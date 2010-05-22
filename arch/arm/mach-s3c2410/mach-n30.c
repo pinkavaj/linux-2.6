@@ -17,6 +17,7 @@
 #include <linux/kernel.h>
 #include <linux/types.h>
 
+#include <linux/delay.h>
 #include <linux/gpio_keys.h>
 #include <linux/init.h>
 #include <linux/gpio.h>
@@ -49,9 +50,63 @@
 #include <plat/cpu.h>
 #include <plat/devs.h>
 #include <plat/mci.h>
+#include <plat/nand.h>
 #include <plat/s3c2410.h>
 #include <plat/ts.h>
 #include <plat/udc.h>
+
+#ifdef CONFIG_MTD_PARTITIONS
+#include <linux/mtd/mtd.h>
+#include <linux/mtd/nand.h>
+#include <linux/mtd/nand_ecc.h>
+#include <linux/mtd/partitions.h>
+
+struct mtd_partition n35_default_nand_part[] = {
+	/* Original partitioning by manufacturer
+	 *
+	 * 0x0     - 0x3fff  NBoot
+	 * 0x4000  - 0x4fff  TOC
+	 * 0x8000  - 0x27fff Eboot
+	 * 0x28000 - 0x2bfff partition table
+	 * 0x2c000 -         data ...
+	 * FIXME: incomplete
+	 * */
+	{
+		.name   = "bootloader",
+		.offset = 0,
+		.size   = 0x28000,
+		.mask_flags = MTD_WRITEABLE,
+	},
+	{
+		.name   = "partition",
+		.offset = MTDPART_OFS_APPEND,
+		.size   = 0x4000,
+	},
+	{
+		.name   = "rest",
+		.offset = MTDPART_OFS_APPEND,
+		.size   = MTDPART_SIZ_FULL,
+	},
+};
+
+static struct s3c2410_nand_set n35_nand_sets[] = {
+	{
+		.name       = "chip0",
+		.nr_chips   = 1,
+		.nr_partitions  = ARRAY_SIZE(n35_default_nand_part),
+		.partitions = n35_default_nand_part,
+	},
+};
+
+static struct s3c2410_platform_nand n35_nand_info = {
+	.tacls      = 10,
+	.twrph0     = 25,
+	.twrph1     = 10,
+	.nr_sets    = ARRAY_SIZE(n35_nand_sets),
+	.sets       = n35_nand_sets,
+	.ignore_unset_ecc = 1,
+};
+#endif
 
 static struct map_desc n30_iodesc[] __initdata = {
 	/* nothing here yet */
@@ -493,9 +548,12 @@ static struct platform_device *n35_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_usbgadget,
 	&s3c_device_sdi,
+#ifdef CONFIG_MTD_PARTITIONS
+	&s3c_device_nand,
+#endif
+	&s3c_device_timer[0],
 	&s3c_device_adc,
 	&s3c_device_ts,
-	&s3c_device_timer[0],
 	&n35_backlight,
 	&n35_button_device,
 	&n35_blue_led,
@@ -682,6 +740,16 @@ static void __init n30_init(void)
 	}
 
 	if (machine_is_n35()) {
+		s3c_nand_set_platdata(&n35_nand_info);
+
+		/* Clear any locks and write protects on the flash. */
+		WARN_ON(gpio_request(S3C2410_GPC(5), "NAND write protection"));
+		gpio_set_value(S3C2410_GPC(5), 1);
+		udelay(1);
+		gpio_set_value(S3C2410_GPC(5), 0);
+		udelay(1);
+		gpio_set_value(S3C2410_GPC(5), 1);
+
 		/* Turn off suspend and switch the selectable USB port
 		 * to USB device mode.  Turn on suspend for the host
 		 * port since it is not connected on the N35.

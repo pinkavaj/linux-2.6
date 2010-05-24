@@ -56,6 +56,8 @@
 #include <plat/ts.h>
 #include <plat/udc.h>
 
+#include <video/platform_lcd.h>
+
 #ifdef CONFIG_MTD_PARTITIONS
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
@@ -559,6 +561,45 @@ static struct platform_device n35_backlight = {
 	.id   = -1,
 };
 
+static void n35_lcd_set_power(struct plat_lcd_data *pd, unsigned int power)
+{
+	if (power) {
+		gpio_set_value(S3C2410_GPB(8), 1);
+		s3c_gpio_setpull(S3C2410_GPB(8), S3C_GPIO_PULL_UP);
+
+		s3c_gpio_cfgpin(S3C2410_GPB(9), S3C2410_GPIO_OUTPUT);
+		gpio_set_value(S3C2410_GPB(9), 1);
+		s3c_gpio_setpull(S3C2410_GPB(9), S3C_GPIO_PULL_UP);
+
+		s3c_gpio_cfgpin(S3C2410_GPB(10), S3C2410_GPIO_OUTPUT);
+		gpio_set_value(S3C2410_GPB(10), 1);
+		s3c_gpio_setpull(S3C2410_GPB(10), S3C_GPIO_PULL_UP);
+	} else {
+		gpio_set_value(S3C2410_GPB(8), 0);
+		s3c_gpio_setpull(S3C2410_GPB(8), S3C_GPIO_PULL_DOWN);
+
+		s3c_gpio_cfgpin(S3C2410_GPB(9), S3C2410_GPIO_INPUT);
+		s3c_gpio_setpull(S3C2410_GPB(9), S3C_GPIO_PULL_DOWN);
+
+		s3c_gpio_cfgpin(S3C2410_GPB(10), S3C2410_GPIO_INPUT);
+		s3c_gpio_setpull(S3C2410_GPB(10), S3C_GPIO_PULL_DOWN);
+	}
+}
+
+
+static struct plat_lcd_data n35_lcd_power_data = {
+	.set_power = n35_lcd_set_power,
+};
+
+static struct platform_device n35_lcd_powerdev = {
+	.name	= "platform-lcd",
+	.id	= -1,
+	.dev	= {
+		.parent		= &s3c_device_lcd.dev,
+		.platform_data	= &n35_lcd_power_data,
+	},
+};
+
 static void n30_sdi_set_power(unsigned char power_mode, unsigned short vdd)
 {
 	switch (power_mode) {
@@ -613,6 +654,7 @@ static struct platform_device *n35_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_ts,
 	&n35_backlight,
+	&n35_lcd_powerdev,
 	&n30_battery,
 	&n35_button_device,
 	&n35_blue_led,
@@ -801,6 +843,11 @@ static void __init n30_init(void)
 
 	if (machine_is_n35()) {
 		s3c_nand_set_platdata(&n35_nand_info);
+
+		WARN_ON(gpio_request(S3C2410_GPB(8), "LCD driver"));
+		WARN_ON(gpio_request(S3C2410_GPB(9), "LCD HSYNC"));
+		WARN_ON(gpio_request(S3C2410_GPB(10), "LCD VSYNC"));
+		s3c_gpio_cfgpin(S3C2410_GPB(8), S3C2410_GPIO_OUTPUT);
 
 		/* Clear any locks and write protects on the flash. */
 		WARN_ON(gpio_request(S3C2410_GPC(5), "NAND write protection"));

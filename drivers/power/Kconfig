@@ -76,6 +76,12 @@ config BATTERY_DS2782
 	  Say Y here to enable support for the DS2782/DS2786 standalone battery
 	  gas-gauge.
 
+config BATTERY_N30
+	tristate "Acer n30/n35 battery driver"
+	depends on (MACH_N30 || MACH_N35) && I2C
+	help
+	  Say Y here to enable support for batteries on the Acer n30 family.
+
 config BATTERY_PMU
 	tristate "Apple PMU battery"
 	depends on PPC32 && ADB_PMU

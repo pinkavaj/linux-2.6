@@ -23,6 +23,7 @@
 #include <linux/gpio.h>
 #include <linux/input.h>
 #include <linux/interrupt.h>
+#include <linux/pda_power.h>
 #include <linux/platform_device.h>
 #include <linux/pwm_backlight.h>
 #include <linux/serial_core.h>
@@ -178,6 +179,56 @@ static struct s3c2410_ts_mach_info n30_ts_cfg __initdata = {
 	.presc = 49,
 	.oversampling_shift = 3,
 	.cfg_gpio = s3c24xx_ts_cfg_gpio,
+};
+
+/* It would be possible to register GPG1 as interrupt resource EINT9
+ * with the pda_power code, but since GPC7 cannot have an interrupt
+ * connected to it, the pda_power driver will use polling anyway.  In
+ * addition to that, since the USB driver already requests EINT9, the
+ * request_irq in pda_power fails.  So don't do that. */
+
+/*
+static struct resource n30_power_resource[] = {
+	{
+		.name = "usb",
+		.start = IRQ_EINT9,
+		.end   = IRQ_EINT9,
+		.flags = IORESOURCE_IRQ,
+	},
+};
+*/
+
+static int n30_is_ac_online(void)
+{
+	return gpio_get_value(S3C2410_GPC(7));
+}
+
+static int n30_is_usb_online(void)
+{
+	return gpio_get_value(S3C2410_GPG(1));
+}
+
+static char *n30_power_supplied_to[] = {
+	"battery",
+};
+
+static struct pda_power_pdata n30_power_pdata = {
+	.is_ac_online = n30_is_ac_online,
+	.is_usb_online = n30_is_usb_online,
+	.supplied_to = n30_power_supplied_to,
+	.num_supplicants = ARRAY_SIZE(n30_power_supplied_to),
+};
+
+static struct platform_device n30_power = {
+	.name		= "pda-power",
+	.id		= -1,
+	.dev		= {
+		.platform_data	= &n30_power_pdata,
+	},
+/*
+	.num_resources	= ARRAY_SIZE(n30_power_resource),
+	.resource	= n30_power_resource,
+*/
 };
 
 static struct platform_device n30_battery = {
@@ -541,6 +592,7 @@ static struct platform_device *n30_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_ts,
 	&n30_battery,
+	&n30_power,
 	&n30_button_device,
 	&n30_blue_led,
 	&n30_warning_led,
@@ -565,6 +617,7 @@ static struct platform_device *n35_devices[] __initdata = {
 	&n35_button_device,
 	&n35_blue_led,
 	&n35_warning_led,
+	&n30_power,
 };
 
 static struct s3c2410_platform_i2c __initdata n30_i2ccfg = {

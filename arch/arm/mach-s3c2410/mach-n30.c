@@ -55,32 +55,42 @@ static struct map_desc n30_iodesc[] __initdata = {
 	/* nothing here yet */
 };
 
+#define UCON	(S3C2410_UCON_DEFAULT | \
+		 S3C2443_UCON_RXERR_IRQEN)
+
+#define ULCON	(S3C2410_LCON_CS8 | \
+		 S3C2410_LCON_PNONE)
+
+#define UFCON	(S3C2410_UFCON_FIFOMODE | \
+		 S3C2410_UFCON_RXTRIG8 | \
+		 S3C2410_UFCON_TXTRIG4)
+
 static struct s3c2410_uartcfg n30_uartcfgs[] = {
 	/* Normal serial port */
 	[0] = {
 		.hwport	     = 0,
 		.flags	     = 0,
-		.ucon	     = 0x2c5,
-		.ulcon	     = 0x03,
-		.ufcon	     = 0x51,
+		.ucon	     = UCON,
+		.ulcon	     = ULCON,
+		.ufcon	     = UFCON,
 	},
 	/* IR port */
 	[1] = {
 		.hwport	     = 1,
 		.flags	     = 0,
 		.uart_flags  = UPF_CONS_FLOW,
-		.ucon	     = 0x2c5,
-		.ulcon	     = 0x43,
-		.ufcon	     = 0x51,
+		.ucon	     = UCON,
+		.ulcon	     = ULCON | S3C2410_LCON_IRM,
+		.ufcon	     = UFCON,
 	},
 	/* On the N30 the bluetooth controller is connected here.
 	 * On the N35 and variants the GPS receiver is connected here. */
 	[2] = {
 		.hwport	     = 2,
 		.flags	     = 0,
-		.ucon	     = 0x2c5,
-		.ulcon	     = 0x03,
-		.ufcon	     = 0x51,
+		.ucon	     = UCON,
+		.ulcon	     = ULCON,
+		.ufcon	     = UFCON,
 	},
 };
 

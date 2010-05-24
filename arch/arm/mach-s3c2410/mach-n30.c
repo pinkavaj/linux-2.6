@@ -180,6 +180,11 @@ static struct s3c2410_ts_mach_info n30_ts_cfg __initdata = {
 	.cfg_gpio = s3c24xx_ts_cfg_gpio,
 };
 
+static struct platform_device n30_battery = {
+	.name		= "n30-battery",
+	.id		= -1,
+};
+
 static struct gpio_keys_button n30_buttons[] = {
 	{
 		.gpio		= S3C2410_GPF(0),
@@ -535,6 +540,7 @@ static struct platform_device *n30_devices[] __initdata = {
 	&s3c_device_sdi,
 	&s3c_device_adc,
 	&s3c_device_ts,
+	&n30_battery,
 	&n30_button_device,
 	&n30_blue_led,
 	&n30_warning_led,
@@ -555,6 +561,7 @@ static struct platform_device *n35_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_ts,
 	&n35_backlight,
+	&n30_battery,
 	&n35_button_device,
 	&n35_blue_led,
 	&n35_warning_led,

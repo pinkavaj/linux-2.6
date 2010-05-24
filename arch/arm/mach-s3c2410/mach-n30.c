@@ -369,6 +369,15 @@ static struct s3c2410fb_mach_info n30_fb_info __initdata = {
 	.num_displays	= 1,
 	.default_display = 0,
 	.lpcsel		= 0x06,
+
+	.gpccon		= 0xaaa80208,
+	.gpccon_mask	= 0xfffc030c,
+	.gpcup		= 0x0000fe12,
+	.gpcup_mask	= 0xfffffe12,
+	.gpdcon		= 0xaa80aaa4,
+	.gpdcon_mask	= 0xffc0fffc,
+	.gpdup		= 0x0000f8fe,
+	.gpdup_mask	= 0xfffff8fe,
 };
 
 static int n35_backlight_init(struct device *dev)

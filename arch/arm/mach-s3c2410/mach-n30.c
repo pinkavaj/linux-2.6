@@ -367,11 +367,11 @@ static void n30_sdi_set_power(unsigned char power_mode, unsigned short vdd)
 	switch (power_mode) {
 	case MMC_POWER_ON:
 	case MMC_POWER_UP:
-		gpio_set_value(S3C2410_GPG(4), 1);
+		gpio_set_value(S3C2410_GPG(4), 0);
 		break;
 	case MMC_POWER_OFF:
 	default:
-		gpio_set_value(S3C2410_GPG(4), 0);
+		gpio_set_value(S3C2410_GPG(4), 1);
 		break;
 	}
 }

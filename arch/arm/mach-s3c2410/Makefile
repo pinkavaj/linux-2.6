@@ -25,6 +25,7 @@ obj-$(CONFIG_ARCH_H1940)	+= mach-h1940.o
 obj-$(CONFIG_H1940BT)		+= h1940-bluetooth.o
 obj-$(CONFIG_PM_H1940)		+= pm-h1940.o
 obj-$(CONFIG_MACH_N30)		+= mach-n30.o
+obj-$(CONFIG_MACH_N35)		+= n35_gps.o
 obj-$(CONFIG_ARCH_BAST)		+= mach-bast.o usb-simtec.o
 obj-$(CONFIG_MACH_OTOM)		+= mach-otom.o
 obj-$(CONFIG_MACH_AML_M5900)	+= mach-amlm5900.o

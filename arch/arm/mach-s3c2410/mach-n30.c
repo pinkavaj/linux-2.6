@@ -626,6 +626,11 @@ static struct s3c24xx_mci_pdata n30_mci_cfg __initdata = {
 	.set_power	= n30_sdi_set_power,
 };
 
+static struct platform_device n35_device_gps = {
+	.name             = "n35-gps",
+	.id               = -1,
+};
+
 static struct platform_device *n30_devices[] __initdata = {
 	&s3c_device_lcd,
 	&s3c_device_wdt,
@@ -659,6 +664,7 @@ static struct platform_device *n35_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_ts,
 	&n35_backlight,
+	&n35_device_gps,
 	&n35_lcd_powerdev,
 	&n30_battery,
 	&n35_button_device,

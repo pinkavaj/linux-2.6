@@ -49,6 +49,7 @@
 #include <plat/devs.h>
 #include <plat/mci.h>
 #include <plat/s3c2410.h>
+#include <plat/ts.h>
 #include <plat/udc.h>
 
 static struct map_desc n30_iodesc[] __initdata = {
@@ -114,6 +115,13 @@ static struct s3c2410_udc_mach_info n30_udc_cfg __initdata = {
 	.udc_command		= n30_udc_pullup,
 	.vbus_pin		= S3C2410_GPG(1),
 	.vbus_pin_inverted	= 0,
+};
+
+static struct s3c2410_ts_mach_info n30_ts_cfg __initdata = {
+	.delay = 16383,
+	.presc = 49,
+	.oversampling_shift = 3,
+	.cfg_gpio = s3c24xx_ts_cfg_gpio,
 };
 
 static struct gpio_keys_button n30_buttons[] = {
@@ -392,6 +400,8 @@ static struct platform_device *n30_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_usbgadget,
 	&s3c_device_sdi,
+	&s3c_device_adc,
+	&s3c_device_ts,
 	&n30_button_device,
 	&n30_blue_led,
 	&n30_warning_led,
@@ -405,6 +415,8 @@ static struct platform_device *n35_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_usbgadget,
 	&s3c_device_sdi,
+	&s3c_device_adc,
+	&s3c_device_ts,
 	&n35_button_device,
 	&n35_blue_led,
 	&n35_warning_led,
@@ -567,6 +579,7 @@ static void __init n30_init(void)
 	WARN_ON(gpio_request(S3C2410_GPG(4), "mmc power"));
 
 	s3c24xx_fb_set_platdata(&n30_fb_info);
+	s3c24xx_ts_set_platdata(&n30_ts_cfg);
 	s3c24xx_udc_set_platdata(&n30_udc_cfg);
 	s3c24xx_mci_set_platdata(&n30_mci_cfg);
 	s3c_i2c0_set_platdata(&n30_i2ccfg);

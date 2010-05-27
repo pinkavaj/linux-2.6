@@ -880,6 +880,14 @@ void __init reserve_node_zero(pg_data_t *pgdat)
 				BOOTMEM_DEFAULT);
 	}
 
+	/* The bootloader on the Acer N30 family is hardcoded to jump
+	 * to adddress 0x30201000 when woken up from suspend to RAM.
+	 * To make sure that that page is allocated, reserve that
+	 * page of memory really early. */
+	if (machine_is_n30() || machine_is_n35())
+		reserve_bootmem_node(pgdat, 0x30201000, 0x1000,
+				BOOTMEM_DEFAULT);
+
 	if (machine_is_palmld() || machine_is_palmtx()) {
 		reserve_bootmem_node(pgdat, 0xa0000000, 0x1000,
 				BOOTMEM_EXCLUSIVE);

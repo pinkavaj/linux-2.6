@@ -17,5 +17,6 @@
 #define H1940_SUSPEND_CHECK		(0x30080000)
 
 extern void h1940_pm_return(void);
+extern void h1940_pm_return_end(void);
 
 #endif /* __ASM_ARCH_H1940_H */

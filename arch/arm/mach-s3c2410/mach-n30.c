@@ -27,6 +27,7 @@
 #include <linux/platform_device.h>
 #include <linux/pwm_backlight.h>
 #include <linux/serial_core.h>
+#include <linux/sysdev.h>
 #include <linux/timer.h>
 #include <linux/io.h>
 #include <linux/mmc/host.h>
@@ -36,6 +37,7 @@
 #include <asm/mach-types.h>
 
 #include <mach/fb.h>
+#include <mach/h1940.h>
 #include <mach/leds-gpio.h>
 #include <mach/regs-gpio.h>
 #include <mach/regs-lcd.h>
@@ -49,6 +51,7 @@
 
 #include <plat/clock.h>
 #include <plat/cpu.h>
+#include <plat/pm.h>
 #include <plat/devs.h>
 #include <plat/mci.h>
 #include <plat/nand.h>
@@ -57,6 +60,8 @@
 #include <plat/udc.h>
 
 #include <video/platform_lcd.h>
+
+#define N35_SUSPEND_RESUMEAT (S3C2410_SDRAM_PA + 0x201000)
 
 #ifdef CONFIG_MTD_PARTITIONS
 #include <linux/mtd/mtd.h>
@@ -817,6 +822,14 @@ static void __init n30_map_io(void)
 static void __init n30_init(void)
 {
 	WARN_ON(gpio_request(S3C2410_GPG(4), "mmc power"));
+
+	/* setup PM */
+
+#ifdef CONFIG_PM_H1940
+	memcpy(phys_to_virt(N35_SUSPEND_RESUMEAT), h1940_pm_return,
+			h1940_pm_return_end - h1940_pm_return);
+#endif
+	s3c_pm_init();
 
 	s3c24xx_fb_set_platdata(&n30_fb_info);
 	s3c24xx_ts_set_platdata(&n30_ts_cfg);

@@ -51,6 +51,9 @@ ENTRY(s3c2410_cpu_suspend)
 
 	orr	r7, r7, #S3C2410_REFRESH_SELF	@ SDRAM sleep command
 	orr	r8, r8, #S3C2410_MISCCR_SDSLEEP @ SDRAM power-down signals
+						@ turn off data port pull ups
+	orr	r8, r8, #S3C2410_MISCCR_SPUCR_HDIS
+	orr	r8, r8, #S3C2410_MISCCR_SPUCR_LDIS
 	orr	r9, r9, #S3C2410_CLKCON_POWER	@ power down command
 
 	teq	pc, #0			@ first as a trial-run to load cache

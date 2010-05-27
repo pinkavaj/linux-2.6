@@ -19,6 +19,7 @@
 
 #include <linux/delay.h>
 #include <linux/gpio_keys.h>
+#include <linux/memblock.h>
 #include <linux/init.h>
 #include <linux/gpio.h>
 #include <linux/input.h>
@@ -27,6 +28,7 @@
 #include <linux/platform_device.h>
 #include <linux/pwm_backlight.h>
 #include <linux/serial_core.h>
+#include <linux/sysdev.h>
 #include <linux/timer.h>
 #include <linux/io.h>
 #include <linux/mmc/host.h>
@@ -36,6 +38,7 @@
 #include <asm/mach-types.h>
 
 #include <mach/fb.h>
+#include <mach/h1940.h>
 #include <mach/leds-gpio.h>
 #include <mach/regs-gpio.h>
 #include <mach/regs-lcd.h>
@@ -49,6 +52,7 @@
 
 #include <plat/clock.h>
 #include <plat/cpu.h>
+#include <plat/pm.h>
 #include <plat/devs.h>
 #include <plat/mci.h>
 #include <plat/nand.h>
@@ -57,6 +61,8 @@
 #include <plat/udc.h>
 
 #include <video/platform_lcd.h>
+
+#define N35_SUSPEND_RESUMEAT (S3C2410_SDRAM_PA + 0x201000)
 
 #ifdef CONFIG_MTD_PARTITIONS
 #include <linux/mtd/mtd.h>
@@ -800,11 +806,25 @@ static void __init n30_map_io(void)
 	s3c24xx_init_uarts(n30_uartcfgs, ARRAY_SIZE(n30_uartcfgs));
 }
 
+/* Acer N30/N35 need to reserve this memory to suspend */
+static void __init n30_reserve(void)
+{
+       memblock_reserve(0x30201000, 0x1000);
+}
+
 /* GPB3 is the line that controls the pull-up for the USB D+ line */
 
 static void __init n30_init(void)
 {
 	WARN_ON(gpio_request(S3C2410_GPG(4), "mmc power"));
+
+	/* setup PM */
+
+#ifdef CONFIG_PM_H1940
+	memcpy(phys_to_virt(N35_SUSPEND_RESUMEAT), h1940_pm_return,
+			h1940_pm_return_end - h1940_pm_return);
+#endif
+	s3c_pm_init();
 
 	s3c24xx_fb_set_platdata(&n30_fb_info);
 	s3c24xx_ts_set_platdata(&n30_ts_cfg);
@@ -872,6 +892,7 @@ MACHINE_START(N30, "Acer-N30")
 	.init_machine	= n30_init,
 	.init_irq	= s3c24xx_init_irq,
 	.map_io		= n30_map_io,
+	.reserve	= n30_reserve,
 MACHINE_END
 
 MACHINE_START(N35, "Acer-N35")
@@ -882,4 +903,5 @@ MACHINE_START(N35, "Acer-N35")
 	.init_machine	= n30_init,
 	.init_irq	= s3c24xx_init_irq,
 	.map_io		= n30_map_io,
+	.reserve	= n30_reserve,
 MACHINE_END

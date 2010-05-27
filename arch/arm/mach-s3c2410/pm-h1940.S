@@ -27,7 +27,9 @@
 
 	.text
 	.global	h1940_pm_return
+	.global h1940_pm_return_end
 
 h1940_pm_return:
 	mov	r0, #S3C2410_PA_GPIO
 	ldr	pc, [ r0, #S3C2410_GSTATUS3 - S3C24XX_VA_GPIO ]
+h1940_pm_return_end:

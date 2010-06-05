@@ -124,6 +124,7 @@ static void touch_timer_fire(unsigned long data)
 
 			input_report_abs(ts.input, ABS_X, ts.xp);
 			input_report_abs(ts.input, ABS_Y, ts.yp);
+			input_report_abs(ts.input, ABS_PRESSURE, 1);
 
 			input_report_key(ts.input, BTN_TOUCH, 1);
 			input_sync(ts.input);
@@ -140,6 +141,7 @@ static void touch_timer_fire(unsigned long data)
 		ts.count = 0;
 
 		input_report_key(ts.input, BTN_TOUCH, 0);
+		input_report_abs(ts.input, ABS_PRESSURE, 0);
 		input_sync(ts.input);
 
 		writel(WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
@@ -314,10 +316,16 @@ static int __devinit s3c2410ts_probe(struct platform_device *pdev)
 	}
 
 	ts.input = input_dev;
-	ts.input->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
-	ts.input->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+	__set_bit(EV_ABS, ts.input->evbit);
+	__set_bit(ABS_X, ts.input->absbit);
+	__set_bit(ABS_Y, ts.input->absbit);
+	__set_bit(ABS_PRESSURE, ts.input->absbit);
+	__set_bit(EV_SYN, ts.input->evbit);
+	__set_bit(EV_KEY, ts.input->evbit);
+	__set_bit(BTN_TOUCH, ts.input->keybit);
 	input_set_abs_params(ts.input, ABS_X, 0, 0x3FF, 0, 0);
 	input_set_abs_params(ts.input, ABS_Y, 0, 0x3FF, 0, 0);
+	input_set_abs_params(ts.input, ABS_PRESSURE, 0, 1, 0, 0);
 
 	ts.input->name = "S3C24XX TouchScreen";
 	ts.input->id.bustype = BUS_HOST;

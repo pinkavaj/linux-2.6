@@ -158,7 +158,6 @@ static struct gpio_keys_button n35_buttons[] = {
 	{
 		.gpio		= S3C2410_GPF(0),
 		.code		= KEY_POWER,
-		.type		= EV_PWR,
 		.desc		= "Power",
 		.active_low	= 0,
 		.wakeup		= 1,
@@ -177,13 +176,13 @@ static struct gpio_keys_button n35_buttons[] = {
 	},
 	{
 		.gpio		= S3C2410_GPG(6),
-		.code		= KEY_DOWN,
+		.code		= KEY_LEFT,
 		.desc		= "Joystick Left",
 		.active_low	= 0,
 	},
 	{
 		.gpio		= S3C2410_GPG(5),
-		.code		= KEY_DOWN,
+		.code		= KEY_RIGHT,
 		.desc		= "Joystick Right",
 		.active_low	= 0,
 	},

@@ -107,9 +107,9 @@ static struct s3c2410_nand_set n35_nand_sets[] = {
 };
 
 static struct s3c2410_platform_nand n35_nand_info = {
-	.tacls      = 10,
-	.twrph0     = 25,
-	.twrph1     = 10,
+	.tacls      = 35,
+	.twrph0     = 55,
+	.twrph1     = 25,
 	.nr_sets    = ARRAY_SIZE(n35_nand_sets),
 	.sets       = n35_nand_sets,
 	.ignore_unset_ecc = 1,

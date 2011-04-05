@@ -788,6 +788,17 @@ static void __init n30_init(void)
 	}
 
 	if (machine_is_n35()) {
+		/* Reset all locks - flash is and write protected but ready
+                 * to unlock. */
+		WARN_ON(gpio_request(S3C2410_GPC(5), "NAND write protection"));
+		gpio_set_value(S3C2410_GPC(5), 1);
+		udelay(10);
+		gpio_set_value(S3C2410_GPC(5), 0);
+		udelay(10);
+		gpio_set_value(S3C2410_GPC(5), 1);
+
+                s3c_nand_set_platdata(&n35_nand_info);
+
 		/* Turn off suspend and switch the selectable USB port
 		 * to USB device mode.  Turn on suspend for the host
 		 * port since it is not connected on the N35.

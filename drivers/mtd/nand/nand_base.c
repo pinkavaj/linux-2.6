@@ -3167,6 +3167,20 @@ ident_done:
 	return type;
 }
 
+#define K9F5608U0C      0x75
+
+/**
+ * nand_chip_fixup - Chip specific fixups
+ * @chip             NAND chip structure
+ * @nand_maf_id      Manufacturer ID
+ * @nand_dev_id      Device ID
+ */
+void nand_chip_fixup(struct nand_chip *chip, int nand_maf_id, int nand_dev_id)
+{
+        if (nand_maf_id == NAND_MFR_SAMSUNG && nand_dev_id == K9F5608U0C)
+                chip->options |= NAND_POWERUP_LOCK;
+}
+
 /**
  * nand_scan_ident - [NAND Interface] Scan for the NAND device
  * @mtd:	     MTD device structure
@@ -3219,6 +3233,7 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips,
 	/* Store the number of chips and calc total size for mtd */
 	chip->numchips = i;
 	mtd->size = i * chip->chipsize;
+	nand_chip_fixup(chip, nand_maf_id, nand_dev_id);
 
 	return 0;
 }
@@ -3469,7 +3484,11 @@ int nand_scan_tail(struct mtd_info *mtd)
 	mtd->write_oob = nand_write_oob;
 	mtd->sync = nand_sync;
 	mtd->lock = NULL;
-	mtd->unlock = NULL;
+	if (chip->options & NAND_POWERUP_LOCK) {
+		mtd->unlock = nand_unlock;
+		mtd->flags |= MTD_POWERUP_LOCK;
+	} else
+		mtd->unlock = NULL;
 	mtd->suspend = nand_suspend;
 	mtd->resume = nand_resume;
 	mtd->block_isbad = nand_block_isbad;

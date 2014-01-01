@@ -677,10 +677,17 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	/* 
 	 * If SCSI-2 or lower, store the LUN value in cmnd.
 	 */
-	if (cmd->device->scsi_level <= SCSI_2 &&
-	    cmd->device->scsi_level != SCSI_UNKNOWN) {
-		cmd->cmnd[1] = (cmd->cmnd[1] & 0x1f) |
-			       (cmd->device->lun << 5 & 0xe0);
+	switch (cmd->device->scsi_level) {
+		case SCSI_2:
+		case SCSI_1_CCS:
+		case SCSI_1:
+			if (!(cmd->request->cmd_flags & REQ_LUN_INHIBIT)) {
+				cmd->cmnd[1] = (cmd->cmnd[1] & 0x1f) |
+					(cmd->device->lun << 5 & 0xe0);
+			}
+			break;
+		default:
+			;
 	}
 
 	scsi_log_send(cmd);

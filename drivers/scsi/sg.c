@@ -1662,6 +1662,9 @@ static int sg_start_req(Sg_request *srp, unsigned char *cmd)
 	rq->sense = srp->sense_b;
 	rq->retries = SG_DEFAULT_RETRIES;
 
+	if (hp->flags & SG_FLAG_UNUSED_LUN_INHIBIT)
+		rq->cmd_flags |=  REQ_LUN_INHIBIT;
+
 	if ((dxfer_len <= 0) || (dxfer_dir == SG_DXFER_NONE))
 		return 0;
 
